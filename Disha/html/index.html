@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .center {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container mt-5 center" id="uploadForm">
+        <center><video id="video" width="320" height="240" autoplay muted loop style="display: none;"></video></center>
+        
+
+        <center><label for="file"><b>SELECT VIDEO</b></label></center>
+        <input class="form-control" type="file" accept="video/*" capture="camcorder" id="file" >
+        <center><input value="Submit" type="button" class="btn btn-primary mt-4" id="upload"/></center>
+    </div>
+    <div id="loader" class="center" style="display:none;width: 100%;">
+        <center>
+            <h5 id="pstatus"></h5>
+        </center>
+        <center>
+            <div class="spinner-grow text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <div class="spinner-grow text-secondary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <div class="spinner-grow text-success" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <div class="spinner-grow text-danger" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <div class="spinner-grow text-warning" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <div class="spinner-grow text-info" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+
+            <div class="spinner-grow text-dark" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </center>
+    </div>
+    <div class="result center">
+        <center>
+            <h1 id="res"></h1>
+        </center>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
+        crossorigin="anonymous"></script>
+    <script>
+        url = "http://192.168.43.183"
+        function sleep(millis) {
+            var date = new Date();
+            var curDate = null;
+            do { curDate = new Date(); }
+            while (curDate - date < millis);
+        }
+        function nameFile(inEl, newName) {
+            var file = inEl.files[0];
+            var results = new FormData();
+            results.append('file', file, newName);
+            return results;
+        }
+        function setFileInfo() {
+            myVideos = []
+            var files = this.files;
+            myVideos.push(files[0]);
+            var video = document.createElement('video');
+            video.preload = 'metadata';
+
+            video.onloadedmetadata = ()=> {
+                window.URL.revokeObjectURL(video.src);
+                var duration = video.duration;
+                myVideos[myVideos.length - 1].duration = duration;
+                // print(this.files)
+                var media = URL.createObjectURL(this.files[0]);
+                var video1 = document.getElementById("video");
+                console.log(media)
+                video1.src = media;
+                video1.style.display = "block";
+                video1.play();
+
+                if (duration > 5.5) {
+                    alert("your video is to long")
+                    document.getElementById('file').value = null
+
+                }
+            }
+
+            video.src = URL.createObjectURL(files[0]);;
+        }
+        function sendFile(url, formData) {
+            document.getElementById('pstatus').textContent = ""
+            var requestOptions = {
+                method: 'POST',
+                body: formData,
+                redirect: 'follow'
+            };
+            fetch(url, requestOptions)
+                .then((response) => {
+                    response.json().then((data) => {
+                        console.log(data)
+                        document.getElementById('pstatus').textContent = "file processing..."
+                        new Promise((res, rj) => {
+                            status(data.id)
+                        })
+                    })
+
+                })
+            document.getElementById('pstatus').textContent = "file uploading..."
+
+        }
+        document.getElementById('file').onchange = setFileInfo;
+        document.getElementById("upload").addEventListener('click', () => {
+            try {
+                sendFile(`${url}/uploadfile/`, nameFile(document.getElementById('file'), `temp.mp4`));
+                document.getElementById('uploadForm').style.display = "none";
+                document.getElementById('loader').style.display = 'block';
+                document.getElementById('file').value = null
+            } catch (err) { }
+
+        })
+
+
+
+
+
+        function status(id) {
+            flag = fetch(`${url}/getPrediction/?id=${id}`).then((Response) => {
+                data = Response.json()
+                return data
+            }).then((data) => {
+                console.log(data);
+                if (data.code == 1) {
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('res').innerHTML = `${data.out}`
+                    console.log(data)
+
+                } else {
+                    sleep(5000);
+                    status(id);
+                }
+
+            })
+
+
+        }
+    </script>
+</body>
+
+</html>

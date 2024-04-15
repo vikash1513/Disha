@@ -1,0 +1,6 @@
+2023/02/23 17:15:24 [notice] 1296#4596: signal process started
+2023/02/23 17:28:28 [notice] 22068#14144: signal process started
+2023/02/23 17:30:06 [notice] 22060#15588: signal process started
+2023/10/03 11:00:27 [error] 12316#16628: *1 connect() failed (10061: No connection could be made because the target machine actively refused it) while connecting to upstream, client: 192.168.43.183, server: model, request: "GET /p/ HTTP/1.1", upstream: "http://127.0.0.1:8000/p/", host: "192.168.43.183"
+2023/10/03 11:00:29 [error] 12316#16628: *1 connect() failed (10061: No connection could be made because the target machine actively refused it) while connecting to upstream, client: 192.168.43.183, server: model, request: "GET /favicon.ico HTTP/1.1", upstream: "http://127.0.0.1:8000/favicon.ico", host: "192.168.43.183", referrer: "http://192.168.43.183/p/"
+2023/10/03 11:09:56 [error] 12316#16628: *5 connect() failed (10061: No connection could be made because the target machine actively refused it) while connecting to upstream, client: 192.168.43.183, server: model, request: "GET /p/ HTTP/1.1", upstream: "http://127.0.0.1:8000/p/", host: "192.168.43.183"
